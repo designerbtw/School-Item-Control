@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <link href="{{ url_for('static', filename='css/my_inventory.css') }}" rel="stylesheet">
+    <h2 class="mb-5"><button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#purchaseModal">
+        Добавить
+    </button>
+      План Закупок</h2>
+    <!-- Modal для добавления новых закупок -->
+    <div class="modal fade" id="purchaseModal" tabindex="-1" aria-labelledby="purchaseModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Добавление нового товара в план закупок</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ url_for('purchase.create_purchase') }}" method="post" id="itemForm">
+                        {{ form.hidden_tag() }}  <!-- CSRF токен -->
+                        <div class="form-floating mb-3">
+                            {{ form.name(class="form-control", id="floatingName", placeholder='Название') }}
+                            <label for="floatingName">Название</label>
+                            {% for error in form.name.errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="form-floating mb-3">
+                            {{ form.quantity(class="form-control", id="floatingQuantity", placeholder='Количество') }}
+                            <label for="floatingQuantity">Количество</label>
+                            {% for error in form.quantity.errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="form-floating mb-3">
+                            {{ form.price(class="form-control", id="floatingQuantity", placeholder='Планируемая цена') }}
+                            <label for="floatingQuantity">Планируемая цена</label>
+                            {% for error in form.price.errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="form-floating mb-3">
+                            {{ form.supplier(class="form-control", id="floatingQuantity", placeholder='Поставщик') }}
+                            <label for="floatingQuantity">Поставщик</label>
+                            {% for error in form.supplier.errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary" type="submit">Добавить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="container mt-5">
+    <div class="row">
+        {% for purc in purchases %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-light">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">{{ purc.name }}</h5>
+                    <h6 class="card-subtitle mb-3 text-muted">Количество: {{ purc.quantity }}</h6>
+                    <h6 class="card-subtitle mb-3 text-muted">Планируемая Цена: {{ purc.price }}</h6>
+                    <h6 class="card-subtitle mb-3 text-muted">Поставщик: {{ purc.supplier }}</h6>
+                    <p class="card-text text-muted text-end">
+                        {{ purc.created_at.strftime("%H:%M %d.%m.%Y") }}
+                    </p>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <a href="{{ url_for('purchase.delete_purchase', id=purc.id) }}" class="btn btn-outline-danger btn-sm">Удалить</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

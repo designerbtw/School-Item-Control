@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% if current_user.role.name == 'admin' %}
+    <link href="{{ url_for('static', filename='css/my_inventory.css') }}" rel="stylesheet">
+    <h2 class="mb-5"><button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#inventoryModal">
+        Добавить
+    </button>
+     Доступный оборудование</h2>
+    <!-- Modal для добавления нового оборудования -->
+    <div class="modal fade" id="inventoryModal" tabindex="-1" aria-labelledby="inventoryModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Добавление нового оборудования</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ url_for('inventory.add_item') }}" method="post" id="itemForm">
+                        {{ form.hidden_tag() }}  <!-- CSRF токен -->
+                        <div class="form-floating mb-3">
+                            {{ form.name(class="form-control", id="floatingName", placeholder='Название') }}
+                            <label for="floatingName">Название</label>
+                            {% for error in form.name.errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="form-floating mb-3">
+                            {{ form.quantity(class="form-control", id="floatingQuantity", placeholder='Количество') }}
+                            <label for="floatingQuantity">Количество</label>
+                            {% for error in form.quantity.errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary" type="submit">Добавить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% if current_user.role.name == 'user' %}
+    <h2 class="mb-4">
+     Доступное вам оборудование</h2>
+{% endif %}
+
+<div class="container mt-5">
+    <div class="row">
+        {% for item in items %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-light">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">{{ item.name }}</h5>
+                    <h6 class="card-subtitle mb-3 text-muted">Доступно: {{ item.available_quantity }} / {{ item.total_quantity }}</h6>
+                    <p class="card-text">
+                        Состояние:
+                        {% if item.state.value == 'new' %}
+                            <span class="badge bg-success">Новый</span>
+                        {% elif item.state.value == "used" %}
+                            <span class="badge bg-warning text-dark">Используемый</span>
+                        {% elif item.state.value == "broken" %}
+                            <span class="badge bg-danger">Сломан</span>
+                        {% endif %}
+                    </p>
+                    {% if current_user.role.name == 'admin' %}
+                        {% if item.requested_items %}
+                            <p class="card-text">Закреплено: </p>
+                            {% for req_item in item.requested_items %}
+                            <p class="card-text"><b>{{ req_item.user.name }}</b> - <b>{{ req_item.quantity }} шт</b>
+                                <a class="badge otkr btn btn-secondary" href="{{ url_for('inventory.remove_assign_item', item_id=item.id, user_id=req_item.user.id) }}">Открепить</a></p>
+                            {% endfor %}
+                        {% endif %}
+                    <p class="card-text text-muted text-end">
+                        {{ item.created_at.strftime("%H:%M %d.%m.%Y") }}
+                    </p>
+                    {% endif %}
+                </div>
+                {% if current_user.role.name == 'user' %}
+                <div class="card-footer d-flex justify-content-between">
+                    <a href="{{ url_for('request.create_request', item_id=item.id, user_id=current_user.id, type='repair') }}"  class="btn btn-outline-primary btn-sm">Запросить ремонт</a>
+                    <a href="{{ url_for('request.create_request', item_id=item.id, user_id=current_user.id, type='change') }}" class="btn btn-outline-secondary btn-sm">Запросить замену</a>
+                </div>
+                {% endif %}
+            {% if current_user.role.name == 'admin' %}
+            <div class="card-footer d-flex justify-content-between">
+                <button class="btn btn-outline-primary btn-sm"  data-bs-toggle="modal" data-bs-target="#changeInventoryModal{{ item.id }}">Редактировать</button>
+                <a href="{{ url_for('inventory.delete_item', id=item.id) }}" class="btn btn-outline-danger btn-sm">Удалить</a>
+                <a href="#" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#assignItemModal{{ item.id }}">Назначить</a>
+            </div>
+                <!-- Modal for assigning user -->
+                <div class="modal fade" id="assignItemModal{{ item.id }}" tabindex="-1" aria-labelledby="assignItemModal" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Назначить оборудование</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="{{ url_for('inventory.assign_item', id=item.id) }}" method="POST">
+                                    {{ form3.hidden_tag() }}
+                                    <div class="form-floating mb-3">
+                                        {{ form3.user_id(class="form-control", id="floatingQuantity", placeholder='Назначить') }}
+                                        <label for="userSelect">Выберите работника</label>
+                                        {% for error in form3.user_id.errors %}
+                                            <div class="alert alert-danger" role="alert">
+                                                {{ error }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="form-floating mb-3">
+                                        {{ form3.quantity(class="form-control", id="floatingQuantity", placeholder='Количество', value=item.available_quantity) }}
+                                        <label for="floatingQuantity">Количество</label>
+                                        {% for error in form3.quantity.errors %}
+                                            <div class="alert alert-danger" role="alert">
+                                                {{ error }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-primary">Назначить</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Modal для редактирования оборудования -->
+                <div class="modal fade" id="changeInventoryModal{{ item.id }}" tabindex="-1" aria-labelledby="changeInventoryModal" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Редактирование оборудования</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="{{ url_for('inventory.change_item', id=item.id) }}" method="POST" id="itemForm">
+                                    {{ form2.hidden_tag() }}  <!-- CSRF токен -->
+                                    <div class="form-floating mb-3">
+                                        {{ form2.name(class="form-control", id="floatingName", placeholder='Название', value=item.name) }}
+                                        <label for="floatingName">Название</label>
+                                        {% for error in form2.name.errors %}
+                                            <div class="alert alert-danger" role="alert">
+                                                {{ error }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="form-floating mb-3">
+                                        {{ form2.quantity(class="form-control", id="floatingQuantity", placeholder='Количество', value=item.total_quantity) }}
+                                        <label for="floatingQuantity">Количество</label>
+                                        {% for error in form2.quantity.errors %}
+                                            <div class="alert alert-danger" role="alert">
+                                                {{ error }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="form-floating mb-3">
+                                        {{ form2.state(class="form-control", id="floatingQuantity", placeholder='Количество', value=item.state.value) }}
+                                        <label for="floatingQuantity">Состояние</label>
+                                        {% for error in form2.state.errors %}
+                                            <div class="alert alert-danger" role="alert">
+                                                {{ error }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn btn-primary" type="submit">Изменить</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% if current_user.role.name == 'user' %}
+    <h2 class="mb-4">Свободное оборудование</h2>
+<div class="container mt-5">
+    <div class="d-flex flex-wrap justify-content-start">
+        {% for item in available_items %}
+        <div class="card shadow-sm border-light me-3 mb-4" style="width: 24rem;">
+            <div class="card-body">
+                <h5 class="card-title text-primary">{{ item.name }}</h5>
+                <h6 class="card-subtitle mb-3 text-muted">Доступно: {{ item.available_quantity }} / {{ item.total_quantity }}</h6>
+                    <p class="card-text">
+                        Состояние:
+                        {% if item.state.value == 'new' %}
+                            <span class="badge bg-success">Новый</span>
+                        {% elif item.state.value == "used" %}
+                            <span class="badge bg-warning text-dark">Используемый</span>
+                        {% elif item.state.value == "broken" %}
+                            <span class="badge bg-danger">Сломан</span>
+                        {% endif %}
+                    </p>
+            </div>
+            <div class="card-footer d-flex justify-content-between">
+                <button class="btn btn-outline-secondary btn-sm"  data-bs-toggle="modal" data-bs-target="#CreateRequest{{ item.id }}">Запросить</button>
+            </div>
+            <!-- Modal for creating request user -->
+            <div class="modal fade" id="CreateRequest{{ item.id }}" tabindex="-1" aria-labelledby="assignItemModal" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Запрос оборудования</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form action="{{ url_for('request.create_request', item_id=item.id, user_id=current_user.id, type='take') }}" method="POST">
+                                {{ form4.hidden_tag() }}
+                                <div class="form-floating mb-3">
+                                    {{ form4.quantity(class="form-control", id="floatingQuantity", placeholder='Количество', value=item.available_quantity) }}
+                                    <label for="floatingQuantity">Количество</label>
+                                    {% for error in form4.quantity.errors %}
+                                        <div class="alert alert-danger" role="alert">
+                                            {{ error }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary">Запросить</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

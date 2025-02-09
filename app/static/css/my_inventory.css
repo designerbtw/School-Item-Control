@@ -1,0 +1,15 @@
+@media (max-width: 576px) {
+
+    .btn {
+        font-size: 0.8rem;
+        margin: auto;
+    }
+
+    .card-text {
+        font-size: 0.9rem;
+    }
+
+    .otkr {
+        font-size: 0.7rem;
+    }
+}

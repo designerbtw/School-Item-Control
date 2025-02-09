@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+
+* {
+    font-family: Ubuntu;
+}
+
+.navbar {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.nav-link.active {
+    font-weight: bold;
+}
+
+.flashes {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+}
+
+.alert {
+    margin-bottom: 10px;
+    opacity: 0.9;
+}
+
+.alert .close {
+    border: none;
+    background: none;
+    padding: 0;
+    margin: 0;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: #000;
+    opacity: 0.5;
+}
+.alert-dismissible {
+    padding-right: 16px;
+}
+
+.alert .close:hover {
+    color: #000;
+    opacity: 0.75;
+}
+
+.alert .close:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+@media (max-width: 576px) {
+    .btn-sm {
+        margin-bottom: 13px !important;
+    }
+}

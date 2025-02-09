@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-4">Заявки</h2>
+
+<div class="container mt-5">
+    <div class="row">
+        {% for req in user_requests %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-light">
+                <div class="card-body">
+                    <h5>{{ req.item.name }}</h5>
+                    {% if current_user.role.name == 'admin' %}
+                    <h5 class="card-title text-primary">Пользователь: {{ req.user.name }}</h5>
+                    {% endif %}
+                    {% if req.type.value == 'take' %}
+                    <span class="badge bg-primary mb-3">Новое оборудование</span>
+                    <h6 class="card-subtitle mb-3 text-muted">Запрошено: {{ req.quantity }} / {{ req.item.total_quantity }}</h6>
+                    {% elif req.type.value == 'repair' %}
+                    <span class="badge bg-warning text-dark mb-2">Ремонт</span>
+                    {% elif req.type.value == 'change' %}
+                    <span class="badge bg-info text-dark mb-2">Замена</span>
+                    {% endif %}
+                    <p class="card-text">
+                        Состояние:
+                        {% if req.state.value == 'approved' %}
+                            <span class="badge bg-success">Принята</span>
+                        {% elif req.state.value == "pending" %}
+                            <span class="badge bg-warning text-dark">Ожидание</span>
+                        {% elif req.state.value == "denied" %}
+                            <span class="badge bg-danger">Отклонена</span>
+                        {% endif %}
+                    </p>
+                    {% if current_user.role.name == 'admin' %}
+                    <p class="card-text text-muted text-end">
+                        {{ req.created_at.strftime("%H:%M %d.%m.%Y") }}
+                    </p>
+                    {% endif %}
+                </div>
+                {% if current_user.role.name == 'admin' and req.state.value == 'pending' %}
+                <div class="card-footer d-flex justify-content-between">
+                    <a href="{{ url_for('request.approve_request', id=req.id) }}" class="btn btn-outline-success btn-sm">Принять</a>
+                    <a href="{{ url_for('request.deny_request', id=req.id) }}" class="btn btn-outline-danger btn-sm">Отказать</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
