@@ -14,7 +14,7 @@
 - Закрепление оборудования за пользователями.
 - Планирование закупок с указанием цены и поставщика.
 - Генерация отчетов по состоянию и использованию оборудования.
-- [Интеграция с внешними системами для автоматизации закупок](https://github.com/PavelFr8/IT-polygon-control/blob/main/app/api/API_DOC.md).
+- [Интеграция с внешними системами для автоматизации закупок](https://github.com/designerbtw/School-Item-Control/blob/main/app/api/API_DOC.md).
 
 ### Для пользователя:
 - Регистрация и авторизация.
@@ -42,7 +42,7 @@
 git clone https://github.com/PavelFr8/Inventory-control  
 ```
 #### Шаг 2: Установка зависимостей
-- Создайте файл `.env` (смотри [.env_example](https://github.com/PavelFr8/Inventory-control/blob/main/.env_example)).
+- Создайте файл `.env` (смотри [.env_example](https://github.com/designerbtw/School-Item-Control/blob/main/.env_example)).
 
 #### Шаг 3: Постройте проект с помощью Docker Compose
 ```bash  
@@ -74,7 +74,7 @@ source venv/bin/activate   # для Windows venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-- Создайте файл `.env` и внесите в него необходимые данные (см. файл [.env_example](https://github.com/PavelFr8/Inventory-control/blob/main/.env_example))
+- Создайте файл `.env` и внесите в него необходимые данные (см. файл [.env_example](https://github.com/designerbtw/School-Item-Control/blob/main/.env_example))
 
 ### Шаг 4: Инициализация базы данных
 ```bash
