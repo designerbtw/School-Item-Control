@@ -104,8 +104,11 @@ def change_item(id):
 def delete_item(id):
     item: Item = Item.query.get(id)
     requested_items = item.requested_items
+    reqs = item.requests
     for req_item in requested_items:
         db.session.delete(req_item)
+    for req in reqs:
+        db.session.delete(req)
     db.session.delete(item)
     db.session.commit()
     logger.debug(f"Successfully delete item {item.name}")
