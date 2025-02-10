@@ -39,7 +39,7 @@
 
 #### Шаг 1: Клонирование репозитория
 ```bash  
-git clone https://github.com/PavelFr8/Inventory-control  
+git clone https://github.com/designerbtw/School-Item-Control
 ```
 #### Шаг 2: Установка зависимостей
 - Создайте файл `.env` (смотри [.env_example](https://github.com/designerbtw/School-Item-Control/blob/main/.env_example)).
